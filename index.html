@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Planet Saver // United Earth Defense: Human-Alien Interplanetary Conflict</title>
+  <meta name="description" content="Launch human expedition teams from Earth, travel across realistic planets, battle alien swarms, and rescue human colonists in Planet Saver.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- CRT Flight Avionics Scanline Filter -->
+  <div class="crt-overlay"></div>
+
+  <!-- Persistent Earth Command Navigation Bar -->
+  <header class="top-nav-bar">
+    <div class="nav-brand">
+      <span class="brand-glitch" data-text="PLANET SAVER">PLANET SAVER</span>
+      <span class="brand-sub">🌍 UNITED EARTH AEROSPACE COMMAND</span>
+    </div>
+
+    <div class="nav-telemetry">
+      <div class="telemetry-badge">
+        <span class="telemetry-label">STRIKE RANK</span>
+        <span id="hqPilotRank" class="telemetry-value text-cyan">FLIGHT OFFICER (RANK 1)</span>
+      </div>
+      <div class="telemetry-badge">
+        <span class="telemetry-label">HUMANS RESCUED</span>
+        <span id="hqHumansSavedTotal" class="telemetry-value text-green">0 RESCUED</span>
+      </div>
+      <div class="telemetry-badge">
+        <span class="telemetry-label">ALIEN BIO-CORES</span>
+        <span id="hqTechScraps" class="telemetry-value text-gold">150 CORES</span>
+      </div>
+      <button id="muteToggleBtn" class="cyber-btn-small">🔊 SOUND ON</button>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- EARTH COMMAND BRIDGE MODAL (DISPATCH/HANGAR)-->
+  <!-- ========================================== -->
+  <div id="hqModal" class="modal-backdrop visible">
+    <div class="hq-container">
+      
+      <!-- Tabs -->
+      <div class="hq-nav-tabs">
+        <button class="hq-tab-btn active" data-tab="tabDispatch">
+          <span class="tab-icon">🚀</span> EARTH MISSION DISPATCH
+        </button>
+        <button class="hq-tab-btn" data-tab="tabHangar">
+          <span class="tab-icon">🛠️</span> VANGUARD ARMORY & BIO-TECH
+        </button>
+        <button class="hq-tab-btn" data-tab="tabTeam">
+          <span class="tab-icon">👨‍🚀</span> HUMAN EXPEDITION ROSTER
+        </button>
+        <button class="hq-tab-btn" data-tab="tabCodex">
+          <span class="tab-icon">🧬</span> XENOBIOLOGY DOSSIER
+        </button>
+      </div>
+
+      <!-- TAB 1: EARTH MISSION DISPATCH -->
+      <div id="tabDispatch" class="hq-tab-content active">
+        <div class="dispatch-grid">
+          
+          <!-- Planet Selector -->
+          <div class="dispatch-sidebar">
+            <h3 class="panel-heading">EXPEDITION TARGETS</h3>
+            <div id="planetSelectorList" class="planet-selector-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Briefing Console -->
+          <div class="dispatch-main">
+            <div class="briefing-header">
+              <div class="briefing-badge" id="hqPlanetType">SOL IV // INNER SOLAR SYSTEM</div>
+              <h2 class="briefing-title" id="hqMissionTitle">OPERATION RED VANGUARD: MARS DEFENSE</h2>
+            </div>
+
+            <div class="briefing-body">
+              <!-- Target Planet Telemetry Card -->
+              <div class="holo-preview-card">
+                <div class="earth-origin-badge">ORIGIN: EARTH (TERRA)</div>
+                <div class="transit-vector-arrow">⬇ INTERPLANETARY TRANSIT ⬇</div>
+                <div class="holo-meta">
+                  <div class="meta-row">
+                    <span class="meta-label">DESTINATION:</span>
+                    <span id="hqPlanetName" class="meta-val text-cyan">MARS (ARES-1)</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">DISTANCE FROM EARTH:</span>
+                    <span id="hqTargetDist" class="meta-val text-gold">0.52 AU</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">COLONY SITE:</span>
+                    <span id="hqColonyTarget" class="meta-val text-green">Ares Prime Bio-Dome (6 Humans)</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">ALIEN THREAT:</span>
+                    <span id="hqThreatLevel" class="meta-val text-red">XENO-BURROWERS</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">HIVE LEVIATHAN:</span>
+                    <span id="hqTargetBoss" class="meta-val text-magenta">Xeno-Gargant Burrower</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- General Thorne's Briefing -->
+              <div class="briefing-terminal">
+                <div class="terminal-title">
+                  <span>// UNITED EARTH COMMAND DIRECTIVE // GENEVA HQ</span>
+                </div>
+                <p id="hqMissionDesc" class="terminal-text">
+                  Attention Vanguard Strike Team. Subterranean insectoid alien swarms have breached the crust of Mars, invading Ares Colony One. Human mining engineers and researchers are pinned down inside the bio-domes while alien harvesters attempt to abduct our people. Launch from Earth, burn across the solar system, and save our colonists!
+                </p>
+                <div class="terminal-reward">
+                  <span>MISSION SALVAGE REWARD:</span>
+                  <strong id="hqMissionReward" class="text-gold">+190 ALIEN BIO-CORES</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="briefing-actions">
+              <button id="launchMissionBtn" class="cyber-btn-primary pulse-btn">
+                🚀 LAUNCH EXPEDITION FROM EARTH
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: VANGUARD ARMORY & BIO-TECH UPGRADES -->
+      <div id="tabHangar" class="hq-tab-content">
+        <div class="hangar-layout">
+          <div class="hangar-banner">
+            <div>
+              <h2 class="panel-heading">UNITED EARTH AEROSPACE ARMORY</h2>
+              <p class="panel-sub">Upgrade your Vanguard fighter's titanium plating, kinetic railguns, Maverick missiles, Cryo-EMP, and sentry escort drones.</p>
+            </div>
+            <div class="hangar-scraps-badge">
+              SALVAGE AVAILABLE: <span id="hangarScrapsCount" class="text-gold">150 CORES</span>
+            </div>
+          </div>
+
+          <div id="upgradesListContainer" class="upgrades-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: HUMAN EXPEDITION ROSTER -->
+      <div id="tabTeam" class="hq-tab-content">
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-avatar avatar-thorne"></div>
+            <div class="team-info">
+              <h3>General Robert Thorne</h3>
+              <span class="team-role">Supreme Commander // Earth Defense</span>
+              <p>Veteran of the orbital defense fleet. Coordinates planetary defensive garrisons and strategic fleet deployments from Geneva Command.</p>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <div class="team-avatar avatar-lin"></div>
+            <div class="team-info">
+              <h3>Dr. Maya Lin</h3>
+              <span class="team-role">Chief Astrobiologist // Earth Science Council</span>
+              <p>Discovered the neural broadcast frequency of the alien hive mind. Identifies biological weak points and bio-plasma vulnerabilities.</p>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <div class="team-avatar avatar-pilot"></div>
+            <div class="team-info">
+              <h3>Vanguard Strike Team (You)</h3>
+              <span class="team-role">Lead Flight Officer // Aerospace Wing</span>
+              <p>Top aerospace pilot of the United Earth defense initiative. Trained in atmospheric entry, orbital dogfighting, and colonist extraction.</p>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <div class="team-avatar avatar-colonist"></div>
+            <div class="team-info">
+              <h3>Planetary Colonists</h3>
+              <span class="team-role">Human Scientists, Miners & Medics</span>
+              <p>Stationed in bio-domes across Mars, Europa, Titan, and Proxima b. Vulnerable to alien abduction; extract them to your dropship!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: XENOBIOLOGY CODEX -->
+      <div id="tabCodex" class="hq-tab-content">
+        <div class="codex-container">
+          <div class="codex-card">
+            <h3 class="text-green">XENOPHAGE BIO-DRONES</h3>
+            <p>Fast chitinous insectoids with high-frequency fluttering wings. They spit concentrated corrosive bile and fly in flanking packs to harass human defenses.</p>
+          </div>
+          <div class="codex-card text-magenta">
+            <h3 class="text-magenta">ALIEN ABDUCTOR HARVESTERS</h3>
+            <p>Biomechanical cephalopod craft equipped with vertical tractor-beam emitters. They hover over human colonists and lift them into abduction cargo bays. Shoot them down immediately!</p>
+          </div>
+          <div class="codex-card">
+            <h3 class="text-gold">XENO-SPITTER ARTILLERY</h3>
+            <p>Heavily armored alien siege units that launch explosive acid mortars. They target the structural glass of human bio-domes.</p>
+          </div>
+          <div class="codex-card">
+            <h3 class="text-red">THE HIVE EMPRESS</h3>
+            <p>Colossal alien nerve center located on Xeno-Prime. Incubates billions of planetary bio-spores intended to exterminate mankind on Earth.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- COMBAT HUD OVERLAY                         -->
+  <!-- ========================================== -->
+  <div id="hudOverlay" class="hud-overlay">
+    
+    <!-- Top Left: Player Aerospace Craft Status -->
+    <div class="hud-panel hud-pilot-status">
+      <div class="hud-gauge-group">
+        <div class="gauge-header">
+          <span>HULL ARMOR</span>
+          <span id="hudHpText">100 / 100</span>
+        </div>
+        <div class="gauge-bar"><div id="hudHpFill" class="gauge-fill hp-fill"></div></div>
+      </div>
+
+      <div class="hud-gauge-group">
+        <div class="gauge-header">
+          <span>DEFLECTOR SHIELD</span>
+          <span id="hudShieldText">80 / 80</span>
+        </div>
+        <div class="gauge-bar"><div id="hudShieldFill" class="gauge-fill shield-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Top Center: Wave & Sector Objective -->
+    <div class="hud-panel hud-wave-box">
+      <div id="hudWaveStatus" class="wave-title">INVASION WAVE 1 / 3</div>
+      <div class="wave-sub">DEFEND COLONY & INTERCEPT ALIEN ABDUCTION CRAFT</div>
+    </div>
+
+    <!-- Top Right: Colony Status, Humans Rescued & Radar -->
+    <div class="hud-panel hud-colony-status">
+      <div class="colony-gauge-card">
+        <div class="gauge-header">
+          <span class="text-green">COLONY INTEGRITY</span>
+          <span id="hudColonyText">1000 / 1000</span>
+        </div>
+        <div class="gauge-bar"><div id="hudColonyFill" class="gauge-fill colony-fill"></div></div>
+        
+        <div class="humans-hud-badge">
+          <span>HUMANS IN SECTOR:</span>
+          <strong id="hudHumansStatus" class="text-gold">0 / 6 SECURED</strong>
+        </div>
+      </div>
+      <div class="minimap-container">
+        <canvas id="hudMinimap" width="130" height="130"></canvas>
+        <span class="minimap-label">ACOUSTIC RADAR</span>
+      </div>
+    </div>
+
+    <!-- Bottom Center: Military Radio Transmission -->
+    <div id="transmissionBox" class="hud-transmission-box">
+      <div class="comm-avatar">
+        <div class="avatar-holo"></div>
+      </div>
+      <div class="comm-content">
+        <div id="transmissionSpeaker" class="comm-speaker">// FLIGHT CONTROL (EARTH)</div>
+        <div id="transmissionText" class="comm-text">Atmospheric exit from Earth confirmed. Setting coordinates for Mars. Intercept alien harvesters!</div>
+      </div>
+    </div>
+
+    <!-- Bottom Left: Weapons & Avionics -->
+    <div class="hud-panel hud-weapons-status">
+      <div class="weapon-indicator">
+        <span class="weapon-name">KINETIC RAILGUN:</span>
+        <span class="weapon-val text-green">ARMED</span>
+      </div>
+      <div class="weapon-indicator">
+        <span class="weapon-name">MAVERICK TORPEDOES (R-CLICK):</span>
+        <span id="hudMissileCount" class="weapon-val text-gold">LOCKED</span>
+      </div>
+      <div class="weapon-indicator">
+        <span class="weapon-name">CRYO-EMP NOVA (Q / E):</span>
+        <span id="hudEmpStatus" class="weapon-val text-cyan">LOCKED</span>
+      </div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div class="mobile-touch-bar">
+      <button id="touchFireBtn" class="touch-action-btn fire-btn">🔥 FIRE</button>
+      <button id="touchMissileBtn" class="touch-action-btn missile-btn">🚀 MISSILE</button>
+      <button id="touchEmpBtn" class="touch-action-btn emp-btn">⚡ EMP</button>
+    </div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MISSION DEBRIEF MODAL (VICTORY)            -->
+  <!-- ========================================== -->
+  <div id="debriefModal" class="modal-backdrop">
+    <div class="debrief-container">
+      <div class="debrief-stamp">COLONY LIBERATED</div>
+      <h2 id="debriefPlanetName" class="debrief-title text-green">MARS COLONY ONE LIBERATED</h2>
+      <p class="debrief-sub">Alien invasion fleet wiped out. Human colonists secured aboard extraction shuttles.</p>
+
+      <div class="debrief-stats-grid">
+        <div class="debrief-stat-card">
+          <span class="stat-lbl">TOTAL COMBAT SCORE</span>
+          <span id="debriefScore" class="stat-num text-cyan">4,850 PTS</span>
+        </div>
+        <div class="debrief-stat-card">
+          <span class="stat-lbl">ALIEN SALVAGE CORES</span>
+          <span id="debriefScrap" class="stat-num text-gold">+310 CORES</span>
+        </div>
+        <div class="debrief-stat-card">
+          <span class="stat-lbl">HUMAN LIVES SAVED</span>
+          <span id="debriefHumansSaved" class="stat-num text-green">6 / 6 Rescued (+150 Cores)</span>
+        </div>
+        <div class="debrief-stat-card">
+          <span class="stat-lbl">COLONY DOME INTEGRITY</span>
+          <span id="debriefColonyHealth" class="stat-num text-green">92% (+92 Cores)</span>
+        </div>
+        <div class="debrief-stat-card">
+          <span class="stat-lbl">EARTH DEFENSE RANK</span>
+          <span id="debriefPilotRank" class="stat-num text-gold">STRIKE LIEUTENANT</span>
+        </div>
+      </div>
+
+      <div class="debrief-actions">
+        <button class="cyber-btn-secondary return-hq-btn">
+          🌍 RETURN TO EARTH COMMAND
+        </button>
+        <button id="nextMissionBtn" class="cyber-btn-primary">
+          🚀 DEPART FOR NEXT COLONY
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- GAME OVER MODAL (DEFEAT)                   -->
+  <!-- ========================================== -->
+  <div id="gameOverModal" class="modal-backdrop">
+    <div class="gameover-container">
+      <div class="gameover-stamp">EMERGENCY DISTRESS BEACON</div>
+      <h2 class="gameover-title text-red">MISSION FAILED</h2>
+      <p id="gameOverReason" class="gameover-sub">VANGUARD CRAFT DESTROYED IN ACTION</p>
+
+      <p class="gameover-desc">
+        Earth aerospace recovery units extracted your escape pod from the planet's surface. Re-arm your fighter at Earth Command and redeploy to save humanity!
+      </p>
+
+      <div class="gameover-actions">
+        <button id="retryMissionBtn" class="cyber-btn-primary">
+          🔄 RE-LAUNCH EXPEDITION
+        </button>
+        <button class="cyber-btn-secondary return-hq-btn">
+          🌍 RETREAT TO EARTH COMMAND
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="src/audio.js"></script>
+  <script src="src/particles.js"></script>
+  <script src="src/galaxy.js"></script>
+  <script src="src/upgrades.js"></script>
+  <script src="src/missions.js"></script>
+  <script src="src/entities.js"></script>
+  <script src="src/game.js"></script>
+</body>
+</html>
